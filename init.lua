@@ -13,7 +13,7 @@ Kickstart.nvim is a template for your own configuration.
   Once you've done that, you should start exploring, configuring and tinkering to
   explore Neovim!
 
-  If you don't know anything about Lua, I recommend taking some time to read through
+
   a guide. One possible example:
   - https://learnxinyminutes.com/docs/lua/
 
@@ -129,6 +129,15 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
+  'MunifTanjim/nui.nvim',
+  "christoomey/vim-tmux-navigator",
+  "ThePrimeagen/harpoon",
+  {'akinsho/toggleterm.nvim', version = "*", config = true},
+  {
+    'windwp/nvim-autopairs',
+    event = "InsertEnter",
+    opts = {}
+  },
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -209,16 +218,13 @@ require('lazy').setup({
     },
   },
 
-  {
-    -- Add indentation guides even on blank lines
-    'lukas-reineke/indent-blankline.nvim',
-    -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help indent_blankline.txt`
-    opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
-    },
-  },
+  -- {
+  --   -- Add indentation guides even on blank lines
+  --   'lukas-reineke/indent-blankline.nvim',
+  --   -- Enable `lukas-reineke/indent-blankline.nvim`
+  --   -- See `:help indent_blankline.txt`
+  --   opts = {},
+  -- },
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
@@ -227,6 +233,12 @@ require('lazy').setup({
   {
     'nvim-telescope/telescope.nvim',
     branch = '0.1.x',
+    defaults = {
+      file_ignore_patterns = {
+        "pkg",
+        "node_modules"
+      }
+    },
     dependencies = {
       'nvim-lua/plenary.nvim',
       -- Fuzzy Finder Algorithm which requires local dependencies to be built.
@@ -243,7 +255,36 @@ require('lazy').setup({
       },
     },
   },
+  {
+    "lmburns/lf.nvim",
+    config = function()
+        -- This feature will not work if the plugin is lazy-loaded
+        vim.g.lf_netrw = 1
 
+        require("lf").setup({
+            escape_quit = false,
+            border = "rounded",
+        })
+
+        vim.keymap.set("n", "<leader>o", "<Cmd>Lf<CR>")
+
+        -- vim.api.nvim_create_autocmd({
+        --     event = "User",
+        --     pattern = "LfTermEnter",
+        --     callback = function(a)
+        --         vim.api.nvim_buf_set_keymap(a.buf, "t", "q", "q", {nowait = true})
+        --     end,
+        -- })
+    end,
+    requires = {"toggleterm.nvim"}
+  },
+{
+        "kdheepak/lazygit.nvim",
+        -- optional for floating window border decoration
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+        },
+    },
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -265,7 +306,7 @@ require('lazy').setup({
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {})
 
 -- [[ Setting options ]]
@@ -364,6 +405,8 @@ vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { de
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
+-- vim.keymap.set('n', '<leader>lg', ':term lazygit<CR>', { noremap = true, silent = true })
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
@@ -435,6 +478,24 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+--
+-- Add a new file mark
+vim.api.nvim_set_keymap('n', '<leader>ma', [[<Cmd>lua require("harpoon.mark").add_file()<CR>]], { noremap = true, silent = true })
+
+-- Toggle the quick menu for marks
+vim.api.nvim_set_keymap('n', '<leader>mt', [[<Cmd>lua require("harpoon.ui").toggle_quick_menu()<CR>]], { noremap = true, silent = true })
+
+-- Navigate to a specific file mark
+vim.api.nvim_set_keymap('n', '<leader>m1', [[<Cmd>lua require("harpoon.ui").nav_file(1)<CR>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>m2', [[<Cmd>lua require("harpoon.ui").nav_file(2)<CR>]], { noremap = true, silent = true })
+-- ... etc.
+--
+vim.api.nvim_set_keymap('n', '<leader>n', [[<Cmd>lua require("harpoon.ui").nav_next()<CR>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>p', [[<Cmd>lua require("harpoon.ui").nav_prev()<CR>]], { noremap = true, silent = true })
+--
+
+-- Go to terminal 1
+vim.api.nvim_set_keymap('n', '<leader>t1', [[<Cmd>lua require("harpoon.term").gotoTerminal(1)<CR>]], { noremap = true, silent = true })
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
@@ -452,6 +513,11 @@ local on_attach = function(_, bufnr)
 
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
+
+-- LAZYGIT
+  nmap('<leader>gg', ':LazyGit<CR>', 'Open LazyGit')
+
+  nmap('<leader>cm', ':Mason<CR>', '[C-M] Open Mason')
 
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
@@ -475,6 +541,7 @@ local on_attach = function(_, bufnr)
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, '[W]orkspace [L]ist Folders')
 
+        -- vim.keymap.set('n', '<leader>o', '<Cmd>Lf<CR>')
   -- Create a command `:Format` local to the LSP buffer
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
