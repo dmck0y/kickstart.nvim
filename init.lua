@@ -86,6 +86,8 @@ vim.opt.winminwidth = 5
 vim.opt.wrap = false
 
 vim.g.markdown_recommended_style = 0
+vim.g.loaded_netrw = 0
+vim.g.loaded_netrwPlugin = 0
 
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
@@ -121,14 +123,16 @@ map('n', '<leader>r', ':so %<CR>')
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
-
+  'VonHeikemen/lsp-zero.nvim',
+  'L3MON4D3/LuaSnip',
+  'habamax/vim-godot',
   -- Git related plugins
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
-
+  'jose-elias-alvarez/null-ls.nvim',
   'MunifTanjim/nui.nvim',
   "christoomey/vim-tmux-navigator",
   "ThePrimeagen/harpoon",
@@ -256,35 +260,12 @@ require('lazy').setup({
     },
   },
   {
-    "lmburns/lf.nvim",
-    config = function()
-        -- This feature will not work if the plugin is lazy-loaded
-        vim.g.lf_netrw = 1
-
-        require("lf").setup({
-            escape_quit = false,
-            border = "rounded",
-        })
-
-        vim.keymap.set("n", "<leader>o", "<Cmd>Lf<CR>")
-
-        -- vim.api.nvim_create_autocmd({
-        --     event = "User",
-        --     pattern = "LfTermEnter",
-        --     callback = function(a)
-        --         vim.api.nvim_buf_set_keymap(a.buf, "t", "q", "q", {nowait = true})
-        --     end,
-        -- })
-    end,
-    requires = {"toggleterm.nvim"}
+      "kdheepak/lazygit.nvim",
+      -- optional for floating window border decoration
+      dependencies = {
+          "nvim-lua/plenary.nvim",
+      },
   },
-{
-        "kdheepak/lazygit.nvim",
-        -- optional for floating window border decoration
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-        },
-    },
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -307,6 +288,7 @@ require('lazy').setup({
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   { import = 'custom.plugins' },
+  { "rmagatti/goto-preview" },
 }, {})
 
 -- [[ Setting options ]]
@@ -411,7 +393,7 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim', 'zig' },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -488,6 +470,9 @@ vim.api.nvim_set_keymap('n', '<leader>mt', [[<Cmd>lua require("harpoon.ui").togg
 -- Navigate to a specific file mark
 vim.api.nvim_set_keymap('n', '<leader>m1', [[<Cmd>lua require("harpoon.ui").nav_file(1)<CR>]], { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>m2', [[<Cmd>lua require("harpoon.ui").nav_file(2)<CR>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>m3', [[<Cmd>lua require("harpoon.ui").nav_file(3)<CR>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>m4', [[<Cmd>lua require("harpoon.ui").nav_file(4)<CR>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>m5', [[<Cmd>lua require("harpoon.ui").nav_file(5)<CR>]], { noremap = true, silent = true })
 -- ... etc.
 --
 vim.api.nvim_set_keymap('n', '<leader>n', [[<Cmd>lua require("harpoon.ui").nav_next()<CR>]], { noremap = true, silent = true })
@@ -563,7 +548,10 @@ local servers = {
   rust_analyzer = {},
   tsserver = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
-
+  clangd = {
+    cmd = { "clangd", "--background-index", "--suggest-missing-includes", "--clang-tidy", "-I/opt/homebrew/Cellar/raylib/5.0/include" },
+        -- Add any other Clangd-specific settings here
+  },
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -643,6 +631,19 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
   },
+}
+
+--Godot globals
+vim.g.godot_executable = '/Applications/Godot.app'
+
+--Godot keybindings
+vim.keymap.set('n', '<F4>', ':GodotRunLast<CR>', { noremap = true, buffer = true })
+vim.keymap.set('n', '<F5>', ':GodotRun<CR>', { noremap = true, buffer = true })
+vim.keymap.set('n', '<F6>', ':GodotRunCurrent<CR>', { noremap = true, buffer = true })
+vim.keymap.set('n', '<F7>', ':GodotRunFZF<CR>', { noremap = true, buffer = true })
+
+require'lspconfig'.gdscript.setup{
+  cmd = {"nc", "localhost", "6005"};
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`
