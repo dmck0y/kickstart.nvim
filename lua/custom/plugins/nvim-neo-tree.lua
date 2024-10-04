@@ -4,35 +4,21 @@ return {
   cmd = "Neotree",
   keys = {
     {
-      "<leader>fe",
-      function()
-        require("neo-tree.command").execute({ toggle = true, dir = require("lazyvim.util").get_root() })
-      end,
-      desc = "Explorer NeoTree (root dir)",
-    },
-    {
       "<leader>fE",
       function()
         require("neo-tree.command").execute({ toggle = true, dir = vim.loop.cwd() })
       end,
       desc = "Explorer NeoTree (cwd)",
     },
-    { "<leader>e", "<leader>fe", desc = "Explorer NeoTree (root dir)", remap = true },
+    { "<leader>fe", "<leader>fe", desc = "Explorer NeoTree (root dir)", remap = true },
     { "<leader>E", "<leader>fE", desc = "Explorer NeoTree (cwd)", remap = true },
   },
   deactivate = function()
     vim.cmd([[Neotree close]])
   end,
-  init = function()
-    if vim.fn.argc() == 1 then
-      local stat = vim.loop.fs_stat(vim.fn.argv(0))
-      if stat and stat.type == "directory" then
-        require("neo-tree")
-      end
-    end
-  end,
   opts = {
     sources = { "filesystem", "buffers", "git_status", "document_symbols" },
+    close_if_last_window = true,
     open_files_do_not_replace_types = { "terminal", "Trouble", "qf", "Outline" },
     filesystem = {
       bind_to_cwd = false,
