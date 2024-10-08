@@ -110,7 +110,7 @@ require('lazy').setup({
     end,
   },
   'habamax/vim-godot',
-  --
+  'mhartington/formatter.nvim',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
   --    up-to-date with whatever is in the kickstart repo.
@@ -124,6 +124,46 @@ local lsp_zero = require("lsp-zero")
 lsp_zero.on_attach(function(client, bufnr)
   lsp_zero.default_keymaps({ buffer = bufnr })
 end)
+
+require('formatter').setup({
+  filetype = {
+    javascript = {
+      -- Prettier
+      function()
+        return {
+          exe = "prettier",
+          args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote" },
+          stdin = true
+        }
+      end
+    },
+    typescript = {
+      -- Prettier
+      function()
+        return {
+          exe = "prettier",
+          args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote" },
+          stdin = true
+        }
+      end
+    },
+    typescriptreact = {
+      -- Prettier
+      function()
+        return {
+          exe = "prettier",
+          args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote" },
+          stdin = true
+        }
+      end
+    }
+  }
+});
+
+
+-- [[ Setting options ]]
+-- See `:help vim.o`
+-- NOTE: You can change these options as you wish!
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
@@ -151,6 +191,17 @@ vim.api.nvim_create_autocmd('LspAttach', {
     map('<leader>wl', function()
       print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
     end, '[W]orkspace [L]ist Folders')
+    --
+    -- LAZYGIT
+    map('<leader>gg', ':LazyGit<CR>', 'Open LazyGit')
+
+    -- vim.keymap.set('n', '<leader>o', '<Cmd>Lf<CR>')
+    -- Create a command `:Format` local to the LSP buffer
+    -- vim.api.nvim_buf_create_user_command(bufnr, 'Format', function()
+    --   vim.lsp.buf.format()
+    -- end, { desc = 'Format current buffer with LSP' })
+
+    -- map('<leader>ff', vim.lsp.buf.format(), '[f]ormat current bu[f]fer')
 
     local client = vim.lsp.get_client_by_id(event.data.client_id)
     if client and client.server_capabilities.documentHighlightProvider then
@@ -165,6 +216,16 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
   end,
 })
+
+
+-- Enable the following language servers
+--  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
+--
+--  Add any additional override configuration in the following tables. They will be passed to
+--  the `settings` field of the server config. You must look up that documentation yourself.
+--
+--  If you want to override the default filetypes that your language server will attach to you can
+--  define the property 'filetypes' to the map in question.
 
 local servers = {
   lua_ls = {
