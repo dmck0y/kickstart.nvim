@@ -148,6 +148,7 @@ require('lazy').setup({
       },
     },
   },
+  'APZelos/blamer.nvim',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
   --    up-to-date with whatever is in the kickstart repo.
@@ -254,7 +255,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
-
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
 --
@@ -264,46 +264,54 @@ vim.api.nvim_create_autocmd('LspAttach', {
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 
+-- 2. List your servers and per-server settings
 local servers = {
   lua_ls = {
     settings = {
       Lua = {
-        diagnostics = {
-          globals = { 'vim' }
-        },
-        completion = {
-          callSnippet = 'Replace',
-        },
-        -- Uncomment to disable noisy `missing-fields` warnings
+        diagnostics = { globals = { 'vim' } },
+        completion  = { callSnippet = 'Replace' },
         -- diagnostics = { disable = { 'missing-fields' } },
       },
     },
   },
   rust_analyzer = {},
-  gopls = {},
-  ts_ls = {},
-  zls = {},
-  ols = {},
+  gopls           = {},
+  tsserver        = {},  -- renamed from ts_ls
+  zls             = {},
+  ols             = {},
   clangd = {
-    cmd = { "clangd", "--background-index", "--suggest-missing-includes", "--clang-tidy", "-I/opt/homebrew/Cellar/raylib/5.0/include" },
+    cmd = {
+      "clangd",
+      "--background-index",
+      "--suggest-missing-includes",
+      "--clang-tidy",
+      "-I/opt/homebrew/Cellar/raylib/5.0/include"
+    },
   },
-  html = { filetypes = { 'html', 'twig', 'hbs', 'templ' } },
-  templ = { filetypes = { 'html', 'templ' } },
+  html = {
+    -- fold your 'templ' filetype into HTML rather than having a separate server
+    filetypes = { 'html', 'twig', 'hbs', 'templ' },
+  },
 }
 
+-- 3. Bootstrap mason + mason-lspconfig
 require('mason').setup()
-require('mason-lspconfig').setup({
-  ensure_installed = { "lua_ls", "rust_analyzer", "ts_ls", "gopls", "zls", "ols", "clangd", "html", "templ" },
-  handlers = {
-    function(server_name)
-      -- lsp_zero.default_setup()
-      local server_config = servers[server_name] or {}
-      server_config.capabilities = vim.tbl_deep_extend('force', capabilities, server_config.capabilities or {})
-      require('lspconfig')[server_name].setup(server_config)
-    end,
-  },
-})
+require('mason-lspconfig').setup {
+  ensure_installed = vim.tbl_keys(servers),  -- installs all keys in `servers`
+}
 
+-- 4. Configure each server with your capabilities + settings
+require('mason-lspconfig').setup_handlers {
+  function(server_name)  -- default handler for all installed servers
+    local config = servers[server_name] or {}
+    config.capabilities = vim.tbl_deep_extend('force',
+      capabilities,
+      config.capabilities or {}
+    )
+    require('lspconfig')[server_name].setup(config)
+  end,
+}
 
 local cmp = require('cmp')
 local luasnip = require('luasnip')

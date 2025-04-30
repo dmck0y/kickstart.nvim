@@ -65,6 +65,7 @@ return {
     -- Enable Telescope extensions if they are installed
     pcall(require('telescope').load_extension, 'fzf')
     pcall(require('telescope').load_extension, 'ui-select')
+    pcall(require('telescope').load_extension, 'git-worktree')
 
     -- See `:help telescope.builtin`
     local builtin = require 'telescope.builtin'
@@ -79,6 +80,7 @@ return {
     vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
     vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
     vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
+    vim.keymap.set('n', '<leader>wt', require('telescope').extensions.git_worktree.create_git_worktree, { desc = 'List Git [W]ork[T]rees' })
 
     -- Slightly advanced example of overriding default behavior and theme
     vim.keymap.set('n', '<leader>/', function()

@@ -97,3 +97,5 @@ end
 
 map('i', 'jj', '<Esc>')
 map('n', '<leader>r', ':so %<CR>')
+map('n', '<leader>fw', 'viW*')
+
