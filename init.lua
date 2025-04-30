@@ -59,13 +59,16 @@ vim.opt.rtp:prepend(lazypath)
 --  You can also configure plugins after the setup call,
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
-  { 'williamboman/mason.nvim' },
-  { 'williamboman/mason-lspconfig.nvim' },
+  { 'williamboman/mason.nvim',
+    dependencies = {
+        "williamboman/mason-lspconfig.nvim",
+        "neovim/nvim-lspconfig",
+    }
+  },
   { 'mg979/vim-visual-multi' },
 
   -- NOTE: First, some plugins that don't require any configuration
   { 'VonHeikemen/lsp-zero.nvim',        branch = 'v3.x' },
-  { 'neovim/nvim-lspconfig' },
   { "hrsh7th/cmp-nvim-lsp" },
   { "hrsh7th/nvim-cmp" },
   {
@@ -111,6 +114,40 @@ require('lazy').setup({
   },
   'habamax/vim-godot',
   'mhartington/formatter.nvim',
+  'tikhomirov/vim-glsl',
+  {
+    "mikavilpas/yazi.nvim",
+    event = "VeryLazy",
+    keys = {
+      -- 👇 in this section, choose your own keymappings!
+      {
+        "<leader>-",
+        mode = { "n", "v" },
+        "<cmd>Yazi<cr>",
+        desc = "Open yazi at the current file",
+      },
+      {
+        -- Open in the current working directory
+        "<leader>cw",
+        "<cmd>Yazi cwd<cr>",
+        desc = "Open the file manager in nvim's working directory",
+      },
+      {
+        -- NOTE: this requires a version of yazi that includes
+        -- https://github.com/sxyazi/yazi/pull/1305 from 2024-07-18
+        "<c-up>",
+        "<cmd>Yazi toggle<cr>",
+        desc = "Resume the last yazi session",
+      },
+    },
+    opts = {
+      -- if you want to open yazi instead of netrw, see below for more info
+      open_for_directories = false,
+      keymaps = {
+        show_help = "<f1>",
+      },
+    },
+  },
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
   --    up-to-date with whatever is in the kickstart repo.
@@ -243,8 +280,8 @@ local servers = {
     },
   },
   rust_analyzer = {},
-  tsserver = {},
   gopls = {},
+  ts_ls = {},
   zls = {},
   ols = {},
   clangd = {
@@ -256,7 +293,7 @@ local servers = {
 
 require('mason').setup()
 require('mason-lspconfig').setup({
-  ensure_installed = { "lua_ls", "rust_analyzer", "tsserver", "gopls", "zls", "ols", "clangd", "html", "templ" },
+  ensure_installed = { "lua_ls", "rust_analyzer", "ts_ls", "gopls", "zls", "ols", "clangd", "html", "templ" },
   handlers = {
     function(server_name)
       -- lsp_zero.default_setup()
@@ -389,6 +426,12 @@ vim.keymap.set('n', '<F7>', ':GodotRunFZF<CR>', { noremap = true, buffer = true 
 require 'lspconfig'.gdscript.setup {
   cmd = { "nc", "localhost", "6005" },
 }
+
+local gdproject = io.open(vim.fn.getcwd()..'/project.godot', 'r')
+if gdproject then
+    io.close(gdproject)
+    vim.fn.serverstart './godothost'
+end
 
 --Oil keybindings
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
