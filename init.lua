@@ -275,24 +275,24 @@ local servers = {
       },
     },
   },
-  rust_analyzer = {},
+  rust_analyzer   = {},
   gopls           = {},
-  tsserver        = {},  -- renamed from ts_ls
+  ts_ls           = {},
   zls             = {},
   ols             = {},
-  clangd = {
-    cmd = {
-      "clangd",
-      "--background-index",
-      "--suggest-missing-includes",
-      "--clang-tidy",
-      "-I/opt/homebrew/Cellar/raylib/5.0/include"
-    },
-  },
-  html = {
-    -- fold your 'templ' filetype into HTML rather than having a separate server
-    filetypes = { 'html', 'twig', 'hbs', 'templ' },
-  },
+  clangd          = {
+                    cmd = {
+                      "clangd",
+                      "--background-index",
+                      "--suggest-missing-includes",
+                      "--clang-tidy",
+                      "-I/opt/homebrew/Cellar/raylib/5.0/include"
+                    },
+                  },
+  html            = {
+                   -- fold your 'templ' filetype into HTML rather than having a separate server
+                   filetypes = { 'html', 'twig', 'hbs', 'templ' },
+                  },
 }
 
 -- 3. Bootstrap mason + mason-lspconfig
