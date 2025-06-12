@@ -429,6 +429,16 @@ vim.filetype.add({ extension = { templ = "templ" } })
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.templ", command = "set filetype=templ" })
 vim.api.nvim_create_autocmd({ "BufWritePre" }, { pattern = { "*.templ" }, callback = vim.lsp.buf.format })
 
+-- Open the chat buffer
+vim.keymap.set('n', '<Leader>cc', '<cmd>CodeCompanionChat Toggle<CR>', { desc = 'Toggle CodeCompanion Chat' })
+
+vim.keymap.set('n', '<Leader>co', '<cmd>CodeCompanionActions<CR>', { desc = 'Invoke CodeCompanionActions' })
+
+-- Call the inline assistant
+vim.keymap.set('n', '<Leader>ci', '<cmd>CodeCompanion<CR>', { desc = 'Invoke CodeCompanion Inline' })
+
+vim.keymap.set('v', '<Leader>ci', ':<C-U>CodeCompanion<CR>', { desc = 'Invoke CodeCompanion on Selection' })
+
 --Godot globals
 vim.g.godot_executable = '/Applications/Godot.app'
 

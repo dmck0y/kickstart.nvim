@@ -6,6 +6,12 @@ return {
       chat = {
         adapter = "anthropic",
       },
+      inline = {
+        adapter = "anthropic",
+      },
+      cmd = {
+        adapter = "anthropic",
+      }
     },
   },
   dependencies = {
