@@ -1,5 +1,4 @@
 --[[
-
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
@@ -73,9 +72,18 @@ require('lazy').setup({
   { "hrsh7th/nvim-cmp" },
   {
     "L3MON4D3/LuaSnip",
-    dependencies = { "rafamadriz/friendly-snippets" },
+      version = "v2.*",
+      build = "make install_jsregexp",
+      dependencies = { "rafamadriz/friendly-snippets" },
+      config = function()
+        local ls = require("luasnip")
+        ls.setup {
+          history = true,
+          delete_check_events = "TextChanged",
+        }
+        require("luasnip.loaders.from_vscode").lazy_load()
+      end,
   },
-
   -- Git related plugins
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
@@ -277,7 +285,7 @@ local servers = {
   },
   rust_analyzer   = {},
   gopls           = {},
-  ts_ls           = {},
+  ts_ls           = {},  -- renamed from tsserver
   zls             = {},
   ols             = {},
   clangd          = {
@@ -302,7 +310,7 @@ require('mason-lspconfig').setup {
 }
 
 -- 4. Configure each server with your capabilities + settings
-require('mason-lspconfig').setup_handlers {
+--[[ require('mason-lspconfig').setup_handlers {
   function(server_name)  -- default handler for all installed servers
     local config = servers[server_name] or {}
     config.capabilities = vim.tbl_deep_extend('force',
@@ -311,31 +319,29 @@ require('mason-lspconfig').setup_handlers {
     )
     require('lspconfig')[server_name].setup(config)
   end,
-}
+}]]--
 
 local cmp = require('cmp')
-local luasnip = require('luasnip')
-require('luasnip.loaders.from_vscode').lazy_load()
-luasnip.config.setup {}
+local luasnip = require("luasnip")
 
 cmp.setup({
   sources = {
-    { name = 'nvim_lsp' },
-    { name = 'buffer' },
-    { name = 'luasnip' },
-    { name = 'path' },
+    { name = "nvim_lsp" },
+    { name = "buffer"   },
+    { name = "luasnip"  },
+    { name = "path"     },
   },
-  mapping = cmp.mapping.preset.insert {
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete {},
-    ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
-    },
-    ['<Tab>'] = cmp.mapping(function(fallback)
+  mapping = cmp.mapping.preset.insert({
+    ["<C-n>"]     = cmp.mapping.select_next_item(),
+    ["<C-p>"]     = cmp.mapping.select_prev_item(),
+    ["<C-d>"]     = cmp.mapping.scroll_docs(-4),
+    ["<C-f>"]     = cmp.mapping.scroll_docs(4),
+    ["<C-Space>"] = cmp.mapping.complete(),
+    ["<CR>"]      = cmp.mapping.confirm({
+                      behavior = cmp.ConfirmBehavior.Replace,
+                      select   = true,
+                    }),
+    ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
       elseif luasnip.expand_or_locally_jumpable() then
@@ -343,8 +349,8 @@ cmp.setup({
       else
         fallback()
       end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
+    end, { "i", "s" }),
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
       elseif luasnip.locally_jumpable(-1) then
@@ -352,11 +358,12 @@ cmp.setup({
       else
         fallback()
       end
-    end, { 'i', 's' }),
-  },
+    end, { "i", "s" }),
+  }),
   snippet = {
     expand = function(args)
-      require('luasnip').lsp_expand(args.body)
+      -- use the local `luasnip` we required above
+      luasnip.lsp_expand(args.body)
     end,
   },
 })

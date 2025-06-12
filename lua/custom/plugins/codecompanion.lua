@@ -1,0 +1,24 @@
+return {
+  "olimorris/codecompanion.nvim",
+  opts = {
+    strategies = {
+      -- Change the default chat adapter
+      chat = {
+        adapter = "anthropic",
+      },
+    },
+  },
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    "nvim-treesitter/nvim-treesitter",
+  },
+  adapters = {
+    anthropic = function()
+      return require("codecompanion.adapters").extend("anthropic", {
+        env = {
+          api_key = vim.env.ANTHROPIC_API_KEY,
+        },
+      })
+    end,
+  },
+}
