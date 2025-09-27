@@ -1,1 +1,2 @@
-require "keymaps.lua"
+-- Load custom configurations
+require "custom.keymaps"
