@@ -23,6 +23,28 @@ return {
     -- Useful for getting pretty icons, but requires a Nerd Font.
     { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
   },
+  opts = function()
+    local themes = require('telescope.themes')
+
+    return {
+      defaults = {
+        layout_strategy = 'vertical',
+        layout_config = {
+          width = 0.95,
+          height = 0.95,
+          vertical = {
+            preview_height = 0.5,
+            prompt_position = 'bottom',
+          },
+        },
+        sorting_strategy = 'ascending',
+      },
+      extensions = {
+        fzf = {},
+        ['ui-select'] = themes.get_dropdown(),
+      },
+    }
+   end,
   config = function()
     -- Telescope is a fuzzy finder that comes with a lot of different things that
     -- it can fuzzy find! It's more than just a "file finder", it can search
@@ -54,6 +76,18 @@ return {
       --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
       --   },
       -- },
+      defaults = {
+        layout_strategy = 'vertical',
+        layout_config = {
+          width = 0.95,
+          height = 0.95,
+          vertical = {
+            preview_height = 0.5,
+            prompt_position = 'bottom',
+          },
+        },
+        sorting_strategy = 'ascending',
+      },
       -- pickers = {}
       extensions = {
         fzf = {},
