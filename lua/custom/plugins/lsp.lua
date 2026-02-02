@@ -93,13 +93,12 @@ return {
       local gdproject = io.open(vim.fn.getcwd()..'/project.godot', 'r')
       if gdproject then
         io.close(gdproject)
-        vim.fn.serverstart './godothost'
+        local socket = './godothost'
+        if socket then
+          vim.fn.delete(socket)
+        end
+        vim.fn.serverstart(socket)
       end
-
-      -- Filetype configurations
-      vim.filetype.add({ extension = { templ = "templ" } })
-      vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.templ", command = "set filetype=templ" })
-      vim.api.nvim_create_autocmd({ "BufWritePre" }, { pattern = { "*.templ" }, callback = vim.lsp.buf.format })
 
       -- Godot settings
       vim.g.godot_executable = '/Applications/Godot.app'
@@ -109,6 +108,11 @@ return {
       vim.keymap.set('n', '<F5>', ':GodotRun<CR>', { noremap = true, buffer = true })
       vim.keymap.set('n', '<F6>', ':GodotRunCurrent<CR>', { noremap = true, buffer = true })
       vim.keymap.set('n', '<F7>', ':GodotRunFZF<CR>', { noremap = true, buffer = true })
+      
+      -- Filetype configurations
+      vim.filetype.add({ extension = { templ = "templ" } })
+      vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.templ", command = "set filetype=templ" })
+      vim.api.nvim_create_autocmd({ "BufWritePre" }, { pattern = { "*.templ" }, callback = vim.lsp.buf.format })
     end,
     dependencies = {
       'mason-org/mason.nvim',
